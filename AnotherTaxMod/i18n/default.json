@@ -1,0 +1,21 @@
+﻿{
+  "taxmenu.title": "TAX STATEMENT:",
+  "taxmenu.incometaxtitle": "INCOME TAXES : {{incomeTax}} G",
+  "taxmenu.frauddiscovery": "FRAUD DISCOVERY :\n{{fraudChance}}% chance",
+  "taxmenu.landtaxtitle": "LAND TAXES : {{landTax}} G",
+  "taxmenu.buildingtaxtitle": "BUILDING TAXES : {{buildingTax}} G",
+  "taxmenu.totaltaxtitle": "TOTAL TAXES : {{totalTax}} G",
+  "taxmenu.debtinteresttitle": "DEBT INTERESTS : {{debtInterest}} G",
+  "taxmenu.balance": "BALANCE : {{balance}} G",
+  "taxmenu.button": "PAY",
+  "taxlog.incometaxtitle": "INCOME TAX:",
+  "taxlog.incomeshipped": "Shipping Bin: {{incomeShipped}} G",
+  "taxlog.incomelocal": "Locally: {{incomeLocal}} G",
+  "taxlog.incometaxtotal": "Income Tax = {{incomeTaxTotal}} G",
+
+  "message.paidtaxes": "Paid {{amountPayed}} G in taxes!",
+  "message.cannotpay": "Cannot pay taxes!",
+  "configmenu.seeconfig-paragraph": "To see more options please modify directly the config file. (You can use this config UI with tips to understand the config.json file)",
+  "configmenu.generaloptions-title": "General Options"
+
+}
