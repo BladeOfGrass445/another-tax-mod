@@ -121,7 +121,7 @@
   "configmenu.buildingTaxFlat_UpgradableGreenhouse-paragraph": "Greenhouse Flat Tax (Greenhouse Upgrade mod) (see config.json: \"buildingTaxFlat_UpgradableGreenhouse\") \nFlat tax applied to the Greenhourse building (Modded).\nThe 1st value is the flat tax for the first upgrade, the 2nd for 2nd upgrade until the 5th upgrade.",
   "configmenu.conservationistApplyToBuildingTax-name": "Conservationist Apply To Building Tax (WoL)",
   "configmenu.conservationistApplyToBuildingTax-tooltip": "Whether to Conservationist tax reduction apply to Building Taxes (From the Walk of Life Mod)",
-  "configmenu.extraoptions-title": "Building Taxes",
+  "configmenu.extraoptions-title": "Extra Options",
   "configmenu.extraCalculationLog-name": "Show Details in Log",
   "configmenu.extraCalculationLog-tooltip": "Whether to show calculation details in the log when opening the Tax Menu"
 
