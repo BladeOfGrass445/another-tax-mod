@@ -10,7 +10,7 @@
   "UniqueID": "BladeOfGrass.AnotherTaxMod",
   "Name": "AnotherTaxMod",
   "Author": "BladeOfGrass",
-  "Version": "1.1.0",
+  "Version": "1.1.3",
   "Description": "A highly customisable Tax mod featuring an Income Tax, a Land Tax and a Building Tax.",
   "MinimumApiVersion": "4.1",
   "MinimumGameVersion": "1.6.14",

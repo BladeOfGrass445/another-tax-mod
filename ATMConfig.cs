@@ -59,6 +59,7 @@ namespace AnotherTaxMod
         public bool conservationistApplyToBuildingTax { get; set; } = false;
 
         public bool extraCalculationLog { get; set; } = false;
+        public bool debugLog { get; set; } = false;
 
 
 

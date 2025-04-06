@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Inventories;
+
 
 namespace AnotherTaxMod
 {
@@ -100,30 +102,62 @@ namespace AnotherTaxMod
             }
         }
 
-        public static double GetPoliceChance(ATMTaxData taxData, ATMConfig taxConfig)
+        public static float GetPoliceChance(ATMTaxData taxData, ATMConfig taxConfig)
         {
-            double policeChance = 0;
-            double maxPoliceChance = taxConfig.incomeTaxAdministrationMaxChancePercentage / 100;
+            float policeChance = 0;
+            float maxPoliceChance = taxConfig.incomeTaxAdministrationMaxChancePercentage / 100.0f;
             maxPoliceChance = maxPoliceChance > 1 ? 1 : maxPoliceChance;
             maxPoliceChance = maxPoliceChance < 0 ? 0 : maxPoliceChance;
             if (taxData.SoldLocally <= 0)
             {
                 policeChance = 0;
             }
+            else if (taxData.SoldShipped <= 0)
+            {
+                policeChance = maxPoliceChance;
+            }
             else if ((taxData.SoldLocally < taxData.SoldShipped) && (taxData.SoldLocally > taxConfig.incomeTaxLocalShopThreshold))
             {
                 policeChance = (taxData.SoldLocally - taxConfig.incomeTaxLocalShopThreshold) * 0.05f / (taxData.SoldShipped - taxConfig.incomeTaxLocalShopThreshold);
             }
-            else if (taxData.SoldShipped == 0)
-            {
-                policeChance = maxPoliceChance;
-            }
             else if (taxData.SoldLocally >= taxData.SoldShipped)
             {
-                policeChance = Math.Pow(2, (taxData.SoldLocally - taxData.SoldShipped) / taxData.SoldShipped) * 0.05f;
+                policeChance = (float)Math.Pow(2, (float)(taxData.SoldLocally - taxData.SoldShipped) / (float)taxData.SoldShipped) * 0.05f;
             }
             policeChance = policeChance < 0 ? 0 : policeChance;
             return policeChance >= maxPoliceChance ? maxPoliceChance : policeChance;
+        }
+
+        public static Dictionary<(string Name, int Quality), (Item ItemOne, int Count)> CopyInventoryToDict(Inventory source)
+        {
+            //Convert Inventory to List-
+            List<Item> tempsource = source
+            .Where(item => item != null)
+            .Select(item =>
+            {
+                return item;
+            })
+            .ToList();
+
+            // Create a dictionary to track items by their name and quality.
+            var itemDictionary = new Dictionary<(string Name, int Quality), (Item Item, int Count)>();
+            foreach (var item in tempsource)
+            {
+                Item copyOne = item.getOne();
+                var key = (copyOne.Name, copyOne.Quality);
+
+                if (itemDictionary.ContainsKey(key))
+                {
+                    itemDictionary[key] = (itemDictionary[key].Item, itemDictionary[key].Count + item.Stack); // Combine stack sizes.
+                }
+                else
+                {
+                    // If it's a new item, add it to the dictionary.
+                    itemDictionary[key] = (copyOne, item.Stack);
+                }
+            }
+
+            return itemDictionary;
         }
     }
 }

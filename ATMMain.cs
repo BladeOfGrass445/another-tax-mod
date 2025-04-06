@@ -9,6 +9,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Inventories;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.TerrainFeatures;
@@ -26,7 +27,7 @@ namespace AnotherTaxMod
         public ATMTaxData? taxData;
         public ATMConfig? taxConfig;
         private IDaLionWalkOfLifeApi api;
-        private List<Item> previousInventory; // Store player's inventory before selling
+        private Dictionary<(string Name, int Quality), (Item Item, int Count)> previousInventory; // Store player's inventory before selling
         float result;
 
         /*********
@@ -53,6 +54,8 @@ namespace AnotherTaxMod
             Helper.Events.Player.Warped += this.OnPlayerWarped;
 
             Helper.Events.Display.MenuChanged += this.OnMenuChanged;
+
+            Helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
 
         }
 
@@ -97,7 +100,7 @@ namespace AnotherTaxMod
                         {
                             double policechance = ATMIncomeTax.GetPoliceChance(taxData, taxConfig);
                             int penalty = ATMIncomeTax.GetFraudPenalty(taxData, taxConfig, policechance);
-                            Monitor.Log(Helper.Translation.Get("taxlog.frauddiscovery", new { fraudChance = ATMIncomeTax.GetPoliceChance(taxData, taxConfig)*100 }), LogLevel.Info);
+                            Monitor.Log(Helper.Translation.Get("taxlog.frauddiscovery", new { fraudChance = string.Format("{0:0.##}", ATMIncomeTax.GetPoliceChance(taxData, taxConfig) * 100) }), LogLevel.Info);
                             Monitor.Log(Helper.Translation.Get("taxlog.penalty", new { penalty = ATMIncomeTax.GetFraudPenalty(taxData, taxConfig, policechance) }), LogLevel.Info);
                         }
 
@@ -164,10 +167,10 @@ namespace AnotherTaxMod
                             }
                         }
 
-                        taxData.SoldLocally = 0;
-                        taxData.SoldShipped = 0;
                     }
                 }
+                taxData.SoldLocally = 0;
+                taxData.SoldShipped = 0;
 
             }
             else if (Game1.dayOfMonth == 8 && taxData.Balance > 0)
@@ -269,27 +272,51 @@ namespace AnotherTaxMod
             if (e.NewMenu is ShopMenu)
             {
                 // Capture current inventory when a shop opens
-                previousInventory = Game1.player.Items
-                .Where(item => item != null)
-                .Select(item => {
-                    Item copy = item.getOne();
-                    copy.Stack = item.Stack; // Copy stack size manually
-                    return copy;
-                })
-                .ToList();
-                /*foreach (var item in previousInventory)
+                previousInventory = ATMIncomeTax.CopyInventoryToDict(Game1.player.Items);
+                if (taxConfig.debugLog)
                 {
-                    Monitor.Log($"Item: {item.Name} Quality {item.Quality} : {item.Stack} : {item.sellToStorePrice()* item.Stack} G", LogLevel.Info);
-                }*/
-
-            }
-            if (e.OldMenu is ShopMenu)
-            {
-                //Compare current and previous inventory to know what was sold.
-                taxData.SoldLocally += ATMIncomeTax.GetLocalStoreSold(previousInventory);
+                    foreach (var entry in previousInventory)
+                    {
+                        Monitor.Log($"Item: {entry.Key.Name} Quality {entry.Key.Quality} : {entry.Value.Count} : {entry.Value.Item.sellToStorePrice() * entry.Value.Count} G", LogLevel.Debug);
+                    }
+                }
             }
         }
 
+        // Event handler to detect inventory changes
+        private void OnInventoryChanged(object sender, EventArgs e)
+        {
+            // Check if the current menu is a ShopMenu
+            if (Game1.activeClickableMenu is ShopMenu)
+            {
+                // It's a shop menu, let's track the inventory change
+                Dictionary<(string Name, int Quality), (Item Item, int Count)> currentInventory = ATMIncomeTax.CopyInventoryToDict(Game1.player.Items);
+
+                // Compare the previous inventory with the current one
+                foreach (var previousEntry in previousInventory)
+                {
+                    // Check if the item is no longer in the current inventory
+                    if (!currentInventory.ContainsKey(previousEntry.Key))
+                    {
+                        // This item has been sold (removed from inventory)
+                        if (taxConfig.debugLog)
+                            Monitor.Log($"Item sold: {previousEntry.Key.Name} (Quality: {previousEntry.Key.Quality}, Count: {previousEntry.Value.Count}) = {previousEntry.Value.Item.sellToStorePrice() * previousEntry.Value.Count} G", LogLevel.Debug);
+                        taxData.SoldLocally += previousEntry.Value.Item.sellToStorePrice() * previousEntry.Value.Count;
+                    }
+                    else if (currentInventory[previousEntry.Key].Count < previousEntry.Value.Count)
+                    {
+                        // The stack size of this item has decreased (partially sold)
+                        int soldAmount = previousEntry.Value.Count - currentInventory[previousEntry.Key].Count;
+                        if (taxConfig.debugLog)
+                            Monitor.Log($"Partial sale: {soldAmount} of {previousEntry.Key.Name} (Quality: {previousEntry.Key.Quality}) = {previousEntry.Value.Item.sellToStorePrice() * soldAmount} G", LogLevel.Debug);
+                        taxData.SoldLocally += previousEntry.Value.Item.sellToStorePrice() * soldAmount;
+                    }
+                }
+
+                // Update the previous inventory to the current one after the check
+                previousInventory = currentInventory;
+            }
+        }
     }
 
 

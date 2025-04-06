@@ -71,7 +71,7 @@ namespace AnotherTaxMod
 
             if (taxConfig.incomeTaxAdministrationEnable)
             {
-                spriteBatch.DrawString(Game1.smallFont, Helper.Translation.Get("taxmenu.frauddiscovery", new { fraudChance = ATMIncomeTax.GetPoliceChance(taxData, taxConfig) } ), new Vector2(textX + 450, textY), Color.Black);
+                spriteBatch.DrawString(Game1.smallFont, Helper.Translation.Get("taxmenu.frauddiscovery", new { fraudChance = string.Format("{0:0.##}", ATMIncomeTax.GetPoliceChance(taxData, taxConfig)*100) } ), new Vector2(textX + 450, textY), Color.Black);
             }
             
             spriteBatch.DrawString(Game1.smallFont, Helper.Translation.Get("taxmenu.landtaxtitle", new { landTax = ATMLandTax.GetLandTax(taxConfig, daLionConservationist) } ), new Vector2(textX, textY + 1.5f * spacing), Color.Black);

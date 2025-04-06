@@ -372,6 +372,14 @@ namespace AnotherTaxMod
                 setValue: value => this.taxConfig.extraCalculationLog = value
             );
 
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => Helper.Translation.Get("configmenu.debugLog-name"),
+                tooltip: () => Helper.Translation.Get("configmenu.debugLog-tooltip"),
+                getValue: () => this.taxConfig.debugLog,
+                setValue: value => this.taxConfig.debugLog = value
+            );
+
         }
 
         private void CommitConfig()
